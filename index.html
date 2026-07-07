@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Email invideo Support</title>
+<meta name="robots" content="noindex" />
+<style>
+  /* ---------------------------------------------------------------
+     EDIT THESE if you ever want to change the address or prefill text
+     (the JS below reads the same values, so this block is cosmetic —
+     the real source of truth is the <script> constants at the bottom)
+  --------------------------------------------------------------- */
+  :root {
+    --bg:        #111111;   /* invideo dark */
+    --surface:   #191919;
+    --surface-2: #202020;
+    --border:    #2a2a2a;
+    --text:      #f4f4f4;
+    --muted:     #9a9a9a;
+    --accent:    #f72585;   /* <-- set to your exact invideo brand pink */
+    --radius:    999px;     /* pill buttons */
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+  }
+
+  .wordmark {
+    position: fixed;
+    top: 24px;
+    left: 28px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .wordmark span {
+    color: var(--muted);
+    font-weight: 500;
+    margin-left: 6px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  h1 {
+    font-size: clamp(26px, 6vw, 34px);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 0 0 12px;
+    font-weight: 700;
+  }
+
+  .lede {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0 auto 32px;
+    max-width: 380px;
+  }
+
+  /* The email address is the hero — big, tappable, copyable */
+  .email-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px 14px 20px;
+    margin-bottom: 28px;
+    max-width: 100%;
+  }
+  .email-row .addr {
+    font-size: clamp(16px, 4.4vw, 19px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    word-break: break-all;
+  }
+  .copy-btn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+  }
+  .copy-btn:hover { background: #2a2a2a; }
+  .copy-btn.copied { border-color: var(--accent); color: var(--accent); }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 22px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .pill:hover { background: var(--surface-2); border-color: #3a3a3a; }
+  .pill:active { transform: translateY(1px); }
+  .pill svg { flex: none; opacity: 0.85; }
+
+  /* Primary path — universal mail app */
+  .pill.primary {
+    background: var(--text);
+    color: #111;
+    border-color: var(--text);
+  }
+  .pill.primary:hover { background: #ffffff; }
+
+  .hint {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 22px;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  footer {
+    position: fixed;
+    bottom: 22px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #5c5c5c;
+    font-size: 12px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; }
+    * { transition: none !important; }
+  }
+
+  @media (max-width: 420px) {
+    .actions { flex-direction: column; }
+    .pill { justify-content: center; width: 100%; }
+    .wordmark { top: 18px; left: 20px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wordmark">invideo<span>help</span></div>
+
+  <main class="card">
+    <h1>Email our support team</h1>
+    <p class="lede">Pick how you’d like to send your message — or copy our address and write to us from anywhere.</p>
+
+    <div class="email-row">
+      <span class="addr" id="addr">support@invideo.io</span>
+      <button class="copy-btn" id="copyBtn" type="button" aria-label="Copy email address">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span id="copyLabel">Copy</span>
+      </button>
+    </div>
+
+    <div class="actions">
+      <a class="pill primary" id="mailBtn" href="#" aria-label="Open in your default mail app">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        Your mail app
+      </a>
+      <a class="pill" id="gmailBtn" href="#" target="_blank" rel="noopener" aria-label="Compose in Gmail">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        Gmail
+      </a>
+      <a class="pill" id="outlookBtn" href="#" target="_blank" rel="noopener" aria-label="Compose in Outlook">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        Outlook
+      </a>
+    </div>
+
+    <p class="hint">Gmail and Outlook open in a new tab. “Your mail app” uses whatever email app your device is set up with — if nothing happens, just copy the address above.</p>
+  </main>
+
+  <footer>© invideo · We usually reply within a few hours</footer>
+
+<script>
+  /* ===============================================================
+     SINGLE SOURCE OF TRUTH — change these three lines only.
+     SUBJECT / BODY can be left as empty strings ('') for none.
+     =============================================================== */
+  const EMAIL   = "support@invideo.io";
+  const SUBJECT = "";   // e.g. "Support request"
+  const BODY    = "";   // e.g. "Hi invideo team,\n\n"
+
+  // --- build the links (empty subject/body are omitted automatically) ---
+  const q = [];
+  if (SUBJECT) q.push("su="      + encodeURIComponent(SUBJECT)); // Gmail uses su=
+  if (BODY)    q.push("body="    + encodeURIComponent(BODY));
+  const gmailQ = q.length ? "&" + q.join("&") : "";
+
+  const oq = [];
+  if (SUBJECT) oq.push("subject=" + encodeURIComponent(SUBJECT));
+  if (BODY)    oq.push("body="    + encodeURIComponent(BODY));
+  const outlookQ = oq.length ? "&" + oq.join("&") : "";
+
+  const mq = [];
+  if (SUBJECT) mq.push("subject=" + encodeURIComponent(SUBJECT));
+  if (BODY)    mq.push("body="    + encodeURIComponent(BODY));
+  const mailtoQ = mq.length ? "?" + mq.join("&") : "";
+
+  document.getElementById("addr").textContent = EMAIL;
+  document.getElementById("mailBtn").href    = "mailto:" + EMAIL + mailtoQ;
+  document.getElementById("gmailBtn").href   = "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(EMAIL) + gmailQ;
+  // Consumer Outlook.com deep link. For Microsoft 365 work accounts swap to:
+  // https://outlook.office.com/mail/deeplink/compose?to=
+  document.getElementById("outlookBtn").href = "https://outlook.live.com/mail/0/deeplink/compose?to=" + encodeURIComponent(EMAIL) + outlookQ;
+
+  // --- copy-to-clipboard with feedback ---
+  const copyBtn = document.getElementById("copyBtn");
+  const copyLabel = document.getElementById("copyLabel");
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(EMAIL);
+    } catch (e) {
+      // Fallback for older browsers / non-secure contexts
+      const t = document.createElement("textarea");
+      t.value = EMAIL; document.body.appendChild(t); t.select();
+      document.execCommand("copy"); document.body.removeChild(t);
+    }
+    copyBtn.classList.add("copied");
+    copyLabel.textContent = "Copied";
+    setTimeout(() => {
+      copyBtn.classList.remove("copied");
+      copyLabel.textContent = "Copy";
+    }, 1800);
+  });
+</script>
+</body>
+</html>
